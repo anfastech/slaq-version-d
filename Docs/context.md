@@ -1,50 +1,44 @@
-┌─────────────────────────────────────────────────────────────┐
-│          Django Monolithic Application (Port 8000)          │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  Presentation Layer (Templates + Static Files)      │    │
-│  │  - HTML Templates (Django Template Language)        │    │
-│  │  - Tailwind CSS (Responsive Design)                 │    │
-│  │  - Vanilla JavaScript (Audio Recording, AJAX)       │    │
-│  │  - Chart.js (Data Visualization)                    │    │
-│  └────────────────────┬────────────────────────────────┘    │
-│                       │                                     │
-│  ┌────────────────────▼─────────────────────────────────┐   │
-│  │  Views Layer (Django Views)                          │   │
-│  │  - Session Authentication  (With Username)           │   │
-│  │  - Audio Upload Handling                             │   │
-│  │  - Report Generation Views                           │   │
-│  │  - AJAX API Endpoints (JSON responses)               │   │
-│  └────────────────────┬─────────────────────────────────┘   │
-│                       │                                     │
-│  ┌────────────────────▼─────────────────────────────────┐   │
-│  │  Business Logic Layer                                │   │
-│  │  - Audio Validation                                  │   │
-│  │  - Celery Task Queue Management                      │   │
-│  │  - Report Generation Logic                           │   │
-│  └────────────────────┬─────────────────────────────────┘   │
-└────────────────────────┼────────────────────────────────────┘
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
-        ▼                                 ▼
-┌──────────────────┐            ┌──────────────────┐
-│  PostgreSQL DB   │            │  Celery Worker   │
-│  - User Data     │            │  ┌────────────┐  │
-│  - Recordings    │            │  │ AI Engine  │  │
-│  - Analyses      │            │  │ Wav2Vec2   │  │
-│  - Reports       │            │  │ Models     │  │
-└──────────────────┘            │  └────────────┘  │
-                                │  - Async Tasks   │
-                                │  - Model Loading │
-                                └──────────────────┘
-                                        │
-                                        ▼
-                                ┌──────────────────┐
-                                │  Redis Queue     │
-                                │  - Task Queue    │
-                                │  - Results Cache │
-                                └──────────────────┘
 
+```mermaid
+
+graph TD
+    subgraph SLAQ MVP - Django Monolithic Application
+        PL[Presentation Layer]
+        VL[Views Layer]
+        BL[Business Logic]
+        
+        subgraph PL [Presentation Layer]
+            PL1[HTML Templates<br/>Django Template Language]
+            PL2[Tailwind CSS<br/>Responsive Design]
+            PL3[Vanilla JavaScript<br/>Audio Recording, AJAX]
+            PL4[Chart.js<br/>Data Visualization]
+        end
+        
+        subgraph VL [Views Layer]
+            VL1[Session Authentication]
+            VL2[Audio Upload Handling]
+            VL3[Analysis Results Display]
+        end
+        
+        subgraph BL [Business Logic]
+            BL1[Audio Validation]
+            BL2[Celery Task Queue]
+        end
+    end
+
+    PL --> VL
+    VL --> BL
+    BL --> DB[(PostgreSQL DB<br/>Users, Patients,<br/>Recordings, Analyses)]
+    BL --> CW[Celery Worker]
+    
+    subgraph CW [Celery Worker]
+        AI[AI Engine<br/>Wav2Vec2]
+    end
+    
+    CW --> RQ[Redis Queue]
+```
+<br />
+<br />
 ═══════════════════════════════════════════════════════════════
                     PROJECT CONTEXT & OVERVIEW
 ═══════════════════════════════════════════════════════════════
