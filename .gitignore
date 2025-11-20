@@ -187,3 +187,7 @@ docs/_build/
 site/
 
 **/__pycache__/**
+
+__pycache__/
+*.pyc
+logs/*.log
