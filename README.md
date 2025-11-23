@@ -8,10 +8,12 @@ A clean, simplified, and production-ready README for running the full system: Re
 
 ## 📦 Install Python Environment
 
+> Python version 3.10.11 ⚠️
+
 ```sh
 python -m venv venv
 venv\Scripts\activate
-pip install --upgrade pip
+# pip install --upgrade pip
 ```
 
 ## 📥 Install Required Libraries
