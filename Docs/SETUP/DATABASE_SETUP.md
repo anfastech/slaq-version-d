@@ -32,21 +32,21 @@ Complete guide to set up PostgreSQL database for the SLAQ project on Windows.
 1. Right-click on "Databases"
 2. Select **"Create" → "Database..."**
 3. In the dialog:
-   - **Database name:** `slaq_db`
+   - **Database name:** `slaq_d_db`
    - **Owner:** `postgres` (default)
    - Click **"Save"**
 
 ### Step 4: Verify Database Created
 
-- You should see `slaq_db` appear in the databases list
+- You should see `slaq_d_db` appear in the databases list
 - ✅ Database is ready!
 
 ### Step 5: Update Your `.env` File
 
 ```env
-DB_NAME=slaq_db
+DB_NAME=slaq_d_db
 DB_USER=postgres
-DB_PASSWORD=your_postgres_password_here
+DB_USER_PASSWORD=your_postgres_password_here
 DB_HOST=localhost
 DB_PORT=5432
 ```
@@ -77,13 +77,13 @@ cd "C:\Program Files\PostgreSQL\13\bin"
 
 ```sql
 -- Create the database
-CREATE DATABASE slaq_db;
+CREATE DATABASE slaq_d_db;
 
 -- Verify it was created
 \l
 
 -- Connect to the database (optional, to verify)
-\c slaq_db
+\c slaq_d_db
 
 -- Exit psql
 \q
@@ -92,9 +92,9 @@ CREATE DATABASE slaq_db;
 ### Step 4: Update Your `.env` File
 
 ```env
-DB_NAME=slaq_db
+DB_NAME=slaq_d_db
 DB_USER=postgres
-DB_PASSWORD=your_postgres_password_here
+DB_USER_PASSWORD=your_postgres_password_here
 DB_HOST=localhost
 DB_PORT=5432
 ```
@@ -160,7 +160,7 @@ cd "C:\Program Files\PostgreSQL\13\bin"
    ```
 3. **Check pg_hba.conf:** Ensure `localhost` connections are allowed
 
-### Issue 3: "database slaq_db already exists"
+### Issue 3: "database slaq_d_db already exists"
 
 **Solution:** Database is already created! Just verify your `.env` file has the correct password.
 
@@ -206,7 +206,7 @@ try:
     conn = psycopg2.connect(
         dbname=os.getenv('DB_NAME'),
         user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
+        password=os.getenv('DB_USER_PASSWORD'),
         host=os.getenv('DB_HOST'),
         port=os.getenv('DB_PORT')
     )
@@ -233,9 +233,9 @@ Make sure your `.env` file has the correct password:
 
 ```env
 # Database Configuration
-DB_NAME=slaq_db
+DB_NAME=slaq_d_db
 DB_USER=postgres
-DB_PASSWORD=YOUR_ACTUAL_PASSWORD_HERE
+DB_USER_PASSWORD=YOUR_ACTUAL_PASSWORD_HERE
 DB_HOST=localhost
 DB_PORT=5432
 ```
@@ -310,7 +310,7 @@ Tables created:
 \l
 
 -- Connect to database
-\c slaq_db
+\c slaq_d_db
 
 -- List all tables
 \dt
@@ -333,14 +333,14 @@ SELECT COUNT(*) FROM core_patient;
 
 ```powershell
 cd "C:\Program Files\PostgreSQL\13\bin"
-.\pg_dump -U postgres -d slaq_db -f "C:\backup\slaq_db_backup.sql"
+.\pg_dump -U postgres -d slaq_d_db -f "C:\backup\slaq_d_db_backup.sql"
 ```
 
 ### Restore Database
 
 ```powershell
 cd "C:\Program Files\PostgreSQL\13\bin"
-.\psql -U postgres -d slaq_db -f "C:\backup\slaq_db_backup.sql"
+.\psql -U postgres -d slaq_d_db -f "C:\backup\slaq_d_db_backup.sql"
 ```
 
 ---
@@ -386,7 +386,7 @@ Start-Service postgresql-x64-13
 Stop-Service postgresql-x64-13
 
 # Connect to database
-psql -U postgres -d slaq_db
+psql -U postgres -d slaq_d_db
 
 # Run Django migrations
 python manage.py migrate

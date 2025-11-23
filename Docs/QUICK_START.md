@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ```bash
 # Make sure PostgreSQL is running
 # Create database (if not exists)
-createdb slaq_db
+createdb slaq_d_db
 
 # Run migrations
 python manage.py migrate
@@ -168,7 +168,7 @@ If using PostgreSQL:
 pg_isready
 
 # Check connection settings in settings.py
-# Verify DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+# Verify DB_NAME, DB_USER, DB_USER_PASSWORD, DB_HOST, DB_PORT
 
 # Or switch to SQLite for testing (see Option B above)
 ```
@@ -211,9 +211,9 @@ Create a `.env` file in project root:
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
-DB_NAME=slaq_db
+DB_NAME=slaq_d_db
 DB_USER=postgres
-DB_PASSWORD=your-password
+DB_USER_PASSWORD=your-password
 DB_HOST=localhost
 DB_PORT=5432
 CELERY_BROKER_URL=redis://localhost:6379/0

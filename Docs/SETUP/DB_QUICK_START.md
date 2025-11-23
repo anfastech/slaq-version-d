@@ -8,7 +8,7 @@ python setup_database.py
 
 **What it does:**
 - ✅ Tests PostgreSQL connection
-- ✅ Creates `slaq_db` database
+- ✅ Creates `slaq_d_db` database
 - ✅ Verifies everything works
 - ✅ Updates your `.env` file (optional)
 
@@ -21,12 +21,12 @@ python setup_database.py
 1. **Open pgAdmin 4**
 2. **Connect to PostgreSQL** (enter your password)
 3. **Right-click "Databases"** → Create → Database
-4. **Name:** `slaq_db`
+4. **Name:** `slaq_d_db`
 5. **Click "Save"**
 
 ### Update `.env` file:
 ```env
-DB_PASSWORD=your_postgres_password
+DB_USER_PASSWORD=your_postgres_password
 ```
 
 ---
@@ -38,7 +38,7 @@ DB_PASSWORD=your_postgres_password
 psql -U postgres
 
 # Create database
-CREATE DATABASE slaq_db;
+CREATE DATABASE slaq_d_db;
 
 # Exit
 \q

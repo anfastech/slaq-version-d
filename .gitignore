@@ -1,27 +1,40 @@
-# Python
+# Python bytecode and cache
 *.py[cod]
 *$py.class
-*.so
-.Python
 __pycache__/
+**/__pycache__/**
+**/**/__pycache__/**
 *.pyc
 *.pyo
 *.pyd
+
+# Python environment
 .Python
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Pip logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Testing and coverage
 .tox/
+.nox/
 .coverage
 .coverage.*
-.cache
+.cover/
 nosetests.xml
 coverage.xml
 *.cover
-*.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis
+.pytest_cache/
+**/.pytest_cache/
+**/pytest_cache/
+/pytest_cache
+.hypothesis/
 
 # Django
 *.log
@@ -32,18 +45,12 @@ db.sqlite3-journal
 /staticfiles
 /static_root
 
-# Environment Variables
+# Environment variables
 .env
 .env.local
 .env.*.local
-.venv
-venv/
-ENV/
-env/
-env.bak/
-venv.bak/
 
-# IDE
+# IDE/editor
 .vscode/
 .idea/
 *.swp
@@ -56,12 +63,11 @@ venv.bak/
 .pydevproject
 .settings/
 
-# Jupyter Notebook
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints
 *.ipynb
 
-# Distribution / packaging
-.Python
+# Packaging and distributions
 build/
 develop-eggs/
 dist/
@@ -84,21 +90,6 @@ MANIFEST
 *.manifest
 *.spec
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
 # Celery
 celerybeat-schedule
 celerybeat.pid
@@ -111,7 +102,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# OS files
+# OS and system files
 .DS_Store
 .DS_Store?
 ._*
@@ -121,17 +112,15 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# Media files (user uploads - careful with this)
+# Media files (user uploads: audio recordings, exclude actual media files but keep dirs)
 media/recordings/*.wav
 media/recordings/*.mp3
 media/recordings/*.webm
 media/recordings/*.m4a
 media/recordings/*.ogg
-
-# Keep media directories but not the files
 !media/recordings/.gitkeep
 
-# ML Models (large files)
+# Machine learning models (large files)
 ml_models/wav2vec2/
 ml_models/*.bin
 ml_models/*.pt
@@ -141,53 +130,45 @@ ml_models/*.pkl
 *.ckpt
 *.safetensors
 
-# Reports (generated PDFs)
+# Report PDFs
 reports/*.pdf
 
-# Node modules (if using frontend build tools)
+# Node modules and frontend build files
 node_modules/
 npm-debug.log
 yarn-error.log
 package-lock.json
 yarn.lock
-
-# Frontend build files
 frontend/dist/
 frontend/build/
 frontend/.next/
 frontend/out/
 
-# Database dumps
+# Database dumps and backups
 *.sql
 *.dump
 *.bak
 
-# Secrets and sensitive data
+# Secrets and keys
 *.pem
 *.key
 *.cert
 .secret
 secrets/
 
-# Temporary files
+# Temporary files and folders
 *.tmp
 *.temp
 tmp/
 temp/
 
-# Redis dump
+# Redis dump files
 dump.rdb
 
-# PostgreSQL
+# PostgreSQL data
 *.pgdata
 pgdata/
 
 # Documentation builds
 docs/_build/
 site/
-
-**/__pycache__/**
-
-__pycache__/
-*.pyc
-logs/*.log

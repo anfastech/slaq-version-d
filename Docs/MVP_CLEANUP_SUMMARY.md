@@ -158,12 +158,12 @@ Created fresh migration files for simplified models:
 
 1. **Update `.env` file with your PostgreSQL password:**
    ```env
-   DB_PASSWORD=your_actual_postgres_password
+   DB_USER_PASSWORD=your_actual_postgres_password
    ```
 
 2. **Create the PostgreSQL database:**
    ```sql
-   CREATE DATABASE slaq_db;
+   CREATE DATABASE slaq_d_db;
    ```
    Or use the provided `setup_database.sql` script.
 

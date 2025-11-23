@@ -4,7 +4,7 @@ PostgreSQL Database Setup Script for SLAQ
 This script automates the creation of the PostgreSQL database for SLAQ.
 It will:
 1. Connect to PostgreSQL
-2. Create the slaq_db database
+2. Create the slaq_d_db database
 3. Verify the connection
 4. Optionally update your .env file
 
@@ -55,7 +55,7 @@ def check_postgres_connection(password):
         return False
 
 
-def database_exists(password, dbname='slaq_db'):
+def database_exists(password, dbname='slaq_d_db'):
     """Check if database already exists"""
     try:
         import psycopg2
@@ -86,7 +86,7 @@ def database_exists(password, dbname='slaq_db'):
         return False
 
 
-def create_database(password, dbname='slaq_db'):
+def create_database(password, dbname='slaq_d_db'):
     """Create the SLAQ database"""
     try:
         import psycopg2
@@ -116,7 +116,7 @@ def create_database(password, dbname='slaq_db'):
         return False
 
 
-def verify_database_connection(password, dbname='slaq_db'):
+def verify_database_connection(password, dbname='slaq_d_db'):
     """Verify connection to the created database"""
     try:
         import psycopg2
@@ -159,16 +159,16 @@ def update_env_file(password):
         with open(env_path, 'r') as f:
             lines = f.readlines()
         
-        # Update DB_PASSWORD line
+        # Update DB_USER_PASSWORD line
         updated = False
         for i, line in enumerate(lines):
-            if line.startswith('DB_PASSWORD='):
-                lines[i] = f'DB_PASSWORD={password}\n'
+            if line.startswith('DB_USER_PASSWORD='):
+                lines[i] = f'DB_USER_PASSWORD={password}\n'
                 updated = True
                 break
         
         if not updated:
-            print("⚠️  DB_PASSWORD not found in .env file.")
+            print("⚠️  DB_USER_PASSWORD not found in .env file.")
             return False
         
         # Write back
@@ -180,7 +180,7 @@ def update_env_file(password):
         
     except Exception as e:
         print(f"⚠️  Could not update .env file: {e}")
-        print("   Please update DB_PASSWORD manually in .env")
+        print("   Please update DB_USER_PASSWORD manually in .env")
         return False
 
 
@@ -216,7 +216,7 @@ def main():
     
     # Check if database already exists
     if database_exists(password):
-        print("ℹ️  Database 'slaq_db' already exists!")
+        print("ℹ️  Database 'slaq_d_db' already exists!")
         print()
         
         # Still verify connection
@@ -234,7 +234,7 @@ def main():
             
             print()
             print("Next steps:")
-            print("  1. Ensure .env file has correct DB_PASSWORD")
+            print("  1. Ensure .env file has correct DB_USER_PASSWORD")
             print("  2. Run: python manage.py migrate")
             print("  3. Run: python manage.py createsuperuser")
             print("  4. Run: python manage.py runserver")
@@ -267,13 +267,13 @@ def main():
     else:
         print()
         print("⚠️  Remember to update your .env file manually:")
-        print(f"   DB_PASSWORD={password}")
+        print(f"   DB_USER_PASSWORD={password}")
     
     print()
-    print("🎉 Database 'slaq_db' is ready!")
+    print("🎉 Database 'slaq_d_db' is ready!")
     print()
     print("Next steps:")
-    print("  1. Verify .env file has correct DB_PASSWORD")
+    print("  1. Verify .env file has correct DB_USER_PASSWORD")
     print("  2. Run: python manage.py migrate")
     print("  3. Run: python manage.py createsuperuser")
     print("  4. Run: python manage.py runserver")

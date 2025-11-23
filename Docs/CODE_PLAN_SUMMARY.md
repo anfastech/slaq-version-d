@@ -521,7 +521,7 @@ redis-server
 python manage.py shell
 
 # PostgreSQL
-psql -U postgres -d slaq_db
+psql -U postgres -d slaq_d_db
 ```
 
 ---

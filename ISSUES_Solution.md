@@ -7,6 +7,12 @@
 
 ### Start for enviornment
 
+database 
+```shell
+pip install psycopg2-binary
+python .\setup_database.py
+```
+
 ```shell
  python --version
 #  Python 3.10.11
@@ -14,7 +20,7 @@
 
 ```shell
 python -m venv venv
-\venv\Scripts\activate
+.\venv\Scripts\activate
 ```
 
 ```shell
