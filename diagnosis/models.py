@@ -83,6 +83,20 @@ class AnalysisResult(models.Model):
         help_text="CTC Loss score - lower is better"
     )
     
+    # Stutter Timing Details
+    stutter_timestamps = models.JSONField(
+        default=list,
+        help_text="List of (start, end) timestamp tuples for stutter events"
+    )
+    total_stutter_duration = models.FloatField(
+        default=0.0,
+        help_text="Total duration of stuttering in seconds"
+    )
+    stutter_frequency = models.FloatField(
+        default=0.0,
+        help_text="Stutters per minute"
+    )
+
     # Overall Assessment
     severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
     confidence_score = models.FloatField(
