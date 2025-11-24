@@ -28,37 +28,41 @@ def upload_recording(request):
     """Handle audio file upload"""
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=405)
-    
+
     try:
         patient = request.user.patient_profile
         audio_file = request.FILES.get('audio_file')
         if not audio_file:
             return JsonResponse({'error': 'No audio file provided'}, status=400)
-        
+
         if audio_file.size > settings.MAX_UPLOAD_SIZE:
             max_size_mb = settings.MAX_UPLOAD_SIZE / (1024*1024)
             return JsonResponse({'error': f'File too large. Max size: {max_size_mb}MB'}, status=400)
-        
+
         file_ext = os.path.splitext(audio_file.name)[1].lower()
         if file_ext not in settings.ALLOWED_AUDIO_FORMATS:
             return JsonResponse({'error': f'Invalid file format. Allowed: {", ".join(settings.ALLOWED_AUDIO_FORMATS)}'}, status=400)
-        
+
+        # Log storage type for debugging
+        field = AudioRecording._meta.get_field('audio_file')
+        logger.info(f"AudioRecording.audio_file storage type: {type(field.storage)}, value: {field.storage}")
+
         recording = AudioRecording.objects.create(
             patient=patient,
             audio_file=audio_file,
             file_size_bytes=audio_file.size,
             status='pending'
         )
-        
+
         logger.info(f"Recording {recording.id} uploaded by {patient.user.username}")
         process_audio_recording.delay(recording.id)
-        
+
         return JsonResponse({
             'success': True,
             'recording_id': recording.id,
             'message': 'Audio uploaded successfully. Processing started.'
         }, status=201)
-        
+
     except Patient.DoesNotExist:
         return JsonResponse({'error': 'Patient profile not found'}, status=404)
     except Exception as e:

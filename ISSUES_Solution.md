@@ -25,6 +25,7 @@ python -m venv venv
 
 ```shell
 pip install -r requirements.txt && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install torchcodec==0.8.1
 ```
 
 so here the whole package will install with out conflict.

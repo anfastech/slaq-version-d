@@ -22,8 +22,10 @@ ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 ENCRYPT_KEY = env('DJANGO_ENCRYPT_KEY')
 
-
-
+SUPABASE_URL = env.str('SUPABASE_URL')
+SUPABASE_ANON_KEY = env.str('SUPABASE_ANON_KEY')
+SUPABASE_SERVICE_ROLE_KEY = env.str('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_BUCKET_NAME = env.str('SUPABASE_BUCKET_NAME')
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,10 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party
     'django_celery_results',
-    
+
     # Local apps
     'core.apps.CoreConfig',
     'diagnosis.apps.DiagnosisConfig',
@@ -44,9 +46,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -104,14 +106,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Media files (User uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Supabase Storage Configuration
+if ENVIRONMENT == 'production':
+    DEFAULT_FILE_STORAGE = 'core.supabase_storage.SupabaseStorage'
 
 # Default primary key field type
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication URLs

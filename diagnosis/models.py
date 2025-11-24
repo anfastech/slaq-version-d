@@ -3,14 +3,33 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from core.models import Patient
+from django.core.files.storage import FileSystemStorage
+from core.supabase_storage import SupabaseStorage
+from django.conf import settings
 import os
 
 
 def audio_upload_path(instance, filename):
     """Generate upload path: recordings/patient_id/year/month/filename"""
-    # Use current time since recorded_at might not be set yet
     now = timezone.now()
     return f'recordings/{instance.patient.id}/{now.year}/{now.month}/{filename}'
+
+
+def get_audio_storage():
+    """Return appropriate storage based on ENVIRONMENT"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"ENVIRONMENT: {settings.ENVIRONMENT}")
+    if settings.ENVIRONMENT == 'production':
+        logger.info("Using SupabaseStorage for production")
+        try:
+            return SupabaseStorage()
+        except Exception as e:
+            logger.error(f"Failed to initialize SupabaseStorage, falling back to FileSystemStorage: {e}")
+            return FileSystemStorage()
+    else:
+        logger.info("Using FileSystemStorage for non-production")
+        return FileSystemStorage()
 
 
 class AudioRecording(models.Model):
@@ -24,7 +43,10 @@ class AudioRecording(models.Model):
     ]
     
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='recordings')
-    audio_file = models.FileField(upload_to=audio_upload_path)
+    audio_file = models.FileField(
+        upload_to=audio_upload_path,
+        storage=get_audio_storage
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     duration_seconds = models.FloatField(null=True, blank=True)
     file_size_bytes = models.IntegerField(null=True, blank=True)
@@ -49,8 +71,7 @@ class AudioRecording(models.Model):
     def delete(self, *args, **kwargs):
         """Delete audio file when model is deleted"""
         if self.audio_file:
-            if os.path.isfile(self.audio_file.path):
-                os.remove(self.audio_file.path)
+            self.audio_file.storage.delete(self.audio_file.name)
         super().delete(*args, **kwargs)
 
 
