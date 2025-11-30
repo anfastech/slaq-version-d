@@ -7,6 +7,8 @@ from torch.nn import CTCLoss
 import logging
 from typing import Dict, List, Tuple
 import time
+import requests
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -20,21 +22,37 @@ class StutterDetector:
     def __init__(self):
         """Initialize models - load once and reuse"""
         logger.info("🔄 Initializing StutterDetector models...")
-        
+
         try:
+            # Log model loading source
+            import os
+            hf_cache = os.environ.get('HF_HOME') or os.environ.get('TRANSFORMERS_CACHE')
+            if hf_cache:
+                logger.info(f"📂 Custom Hugging Face cache: {hf_cache}")
+            else:
+                home = os.path.expanduser('~')
+                default_cache = os.path.join(home, '.cache', 'huggingface')
+                logger.info(f"📂 Default Hugging Face cache: {default_cache}")
+
             # Load base model for transcription
+            logger.info("📥 Loading base model: facebook/wav2vec2-base-960h")
             self.base_model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
             self.base_processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
-            
+            logger.info("✅ Base model loaded successfully")
+
             # Load large model for detailed analysis
+            logger.info("📥 Loading large model: facebook/wav2vec2-large-960h-lv60-self")
             self.large_model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-large-960h-lv60-self")
             self.large_processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-large-960h-lv60-self")
-            
+            logger.info("✅ Large model loaded successfully")
+
             # Load XLSR model for target transcript generation
+            logger.info("📥 Loading XLSR model: jonatasgrosman/wav2vec2-large-xlsr-53-english")
             self.xlsr_model = Wav2Vec2ForCTC.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english")
             self.xlsr_processor = Wav2Vec2Processor.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english")
-            
-            logger.info("✅ Models loaded successfully")
+            logger.info("✅ XLSR model loaded successfully")
+
+            logger.info("✅ All models loaded successfully")
             
         except Exception as e:
             logger.error(f"❌ Model loading failed: {e}")
@@ -44,6 +62,97 @@ class StutterDetector:
     def analyze_audio(self, audio_file_path: str, proper_transcript: str = "") -> Dict:
         """
         Complete analysis pipeline
+        Uses external API in production, local models otherwise
+        
+        Args:
+            audio_file_path: Path to audio file
+            proper_transcript: Optional expected transcript (if available)
+        
+        Returns:
+            Dictionary with complete analysis results
+        """
+        # Check if we should use external API in production
+        if settings.ENVIRONMENT == 'production':
+            logger.info("🌐 Using external ML API (production mode)")
+            return self.analyze_audio_via_api(audio_file_path, proper_transcript)
+        
+        # Use local models for non-production environments
+        logger.info("💻 Using local ML models")
+        return self.analyze_audio_local(audio_file_path, proper_transcript)
+    
+    
+    def analyze_audio_via_api(self, audio_file_path: str, proper_transcript: str = "") -> Dict:
+        """
+        Analyze audio using external ML API endpoint
+        
+        Args:
+            audio_file_path: Path to audio file
+            proper_transcript: Optional expected transcript (if available)
+        
+        Returns:
+            Dictionary with complete analysis results
+        """
+        import os
+        
+        start_time = time.time()
+        
+        try:
+            logger.info(f"🎯 Starting API analysis for: {audio_file_path}")
+            
+            # Verify file exists
+            if not os.path.exists(audio_file_path):
+                raise FileNotFoundError(f"Audio file not found: {audio_file_path}")
+            
+            api_url = "https://anfastech-slaq-version-d-ai-test-engine.hf.space/analyze"
+            
+            # Get filename for proper file upload
+            filename = os.path.basename(audio_file_path)
+            
+            # Open audio file and prepare for upload
+            with open(audio_file_path, "rb") as f:
+                files = {"audio": (filename, f, "audio/wav")}
+                data = {"transcript": proper_transcript if proper_transcript else ""}
+                
+                logger.info(f"📤 Sending request to {api_url} with file: {filename}")
+                response = requests.post(api_url, files=files, data=data, timeout=300)
+                response.raise_for_status()
+                
+                result = response.json()
+                logger.info(f"✅ API response received")
+            
+            # Calculate analysis duration
+            analysis_duration = time.time() - start_time
+            
+            # Ensure result has all required fields with defaults if missing
+            formatted_result = {
+                'actual_transcript': result.get('actual_transcript', ''),
+                'target_transcript': result.get('target_transcript', proper_transcript.upper() if proper_transcript else ''),
+                'mismatched_chars': result.get('mismatched_chars', []),
+                'mismatch_percentage': result.get('mismatch_percentage', 0.0),
+                'ctc_loss_score': result.get('ctc_loss_score', 0.0),
+                'stutter_timestamps': result.get('stutter_timestamps', []),
+                'total_stutter_duration': result.get('total_stutter_duration', 0.0),
+                'stutter_frequency': result.get('stutter_frequency', 0.0),
+                'severity': result.get('severity', 'none'),
+                'confidence_score': result.get('confidence_score', 0.0),
+                'analysis_duration_seconds': round(analysis_duration, 2),
+                'model_version': result.get('model_version', 'external-api'),
+            }
+            
+            logger.info(f"✅ API analysis complete in {analysis_duration:.2f}s")
+            return formatted_result
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ API request failed: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"❌ API analysis failed: {e}")
+            raise
+    
+    
+    def analyze_audio_local(self, audio_file_path: str, proper_transcript: str = "") -> Dict:
+        """
+        Complete analysis pipeline using local models
         
         Args:
             audio_file_path: Path to audio file
@@ -55,7 +164,7 @@ class StutterDetector:
         start_time = time.time()
         
         try:
-            logger.info(f"🎯 Starting analysis for: {audio_file_path}")
+            logger.info(f"🎯 Starting local analysis for: {audio_file_path}")
             
             # Step 1: Generate target transcript if not provided
             if not proper_transcript:
@@ -91,11 +200,11 @@ class StutterDetector:
                 'model_version': 'wav2vec2-base-960h',
             }
             
-            logger.info(f"✅ Analysis complete in {analysis_duration:.2f}s")
+            logger.info(f"✅ Local analysis complete in {analysis_duration:.2f}s")
             return result
             
         except Exception as e:
-            logger.error(f"❌ Analysis failed: {e}")
+            logger.error(f"❌ Local analysis failed: {e}")
             raise
     
     

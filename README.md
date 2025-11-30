@@ -18,7 +18,19 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-### Database Setup
+```sh
+# if not, version py 10
+# Create a new environment with Python 3.10.11
+conda create -n py310 python=3.10.11
+
+# Activate the environment
+conda activate py310
+
+# Verify
+python --version
+```
+
+### Database Setup (development)
 
 ```shell
 pip install psycopg2-binary
@@ -140,6 +152,8 @@ pip install -r requirements.txt
 
 ```sh
 celery -A slaq_project worker --pool=solo -l info
+# for production 
+celery -A slaq_project worker --pool=prefork --concurrency=2 -l info
 ```
 
 ---

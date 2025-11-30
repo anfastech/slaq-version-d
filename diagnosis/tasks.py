@@ -8,7 +8,7 @@ import tempfile
 import os
 
 from .models import AudioRecording, AnalysisResult
-from .ai_engine.model_loader import get_stutter_detector
+from .ai_engine.model_loader import get_stutter_detector, log_model_cache_info
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ def process_audio_recording(self, recording_id):
         
         # Load AI detector and analyze audio
         logger.info(f"🤖 Loading AI models...")
+        log_model_cache_info()  # Log cache information
         detector = get_stutter_detector()
         
         logger.info(f"🎵 Analyzing audio with AI...")
