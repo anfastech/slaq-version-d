@@ -18,7 +18,19 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-### Database Setup
+```sh
+# if not, version py 10
+# Create a new environment with Python 3.10.11
+conda create -n py310 python=3.10.11
+
+# Activate the environment
+conda activate py310
+
+# Verify
+python --version
+```
+
+### Database Setup (development)
 
 ```shell
 pip install psycopg2-binary
@@ -138,9 +150,24 @@ pip install -r requirements.txt
 
 3. Run Celery
 
+**⚠️ Windows Limitation:** The `prefork` pool doesn't work on Windows because it requires Unix `fork()` which Windows doesn't support.
+
+**For Windows:**
 ```sh
+# Development (single-threaded)
 celery -A slaq_project worker --pool=solo -l info
+
+# Production (multi-threaded with concurrency)
+celery -A slaq_project worker --pool=threads --concurrency=4 -l info
 ```
+
+**For Linux/Unix (Production Recommended):**
+```sh
+# Production (multi-process with concurrency)
+celery -A slaq_project worker --pool=prefork --concurrency=4 -l info
+```
+
+> **💡 Production Tip:** Adjust `--concurrency` based on your CPU cores (typically 2-4x CPU cores). For heavy ML tasks, start with 2-4 workers.
 
 ---
 

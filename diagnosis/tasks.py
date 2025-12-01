@@ -4,9 +4,11 @@ from django.utils import timezone
 from django.conf import settings
 import logging
 import librosa
+import tempfile
+import os
 
 from .models import AudioRecording, AnalysisResult
-from .ai_engine.model_loader import get_stutter_detector
+from .ai_engine.model_loader import get_stutter_detector, log_model_cache_info
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +30,13 @@ def process_audio_recording(self, recording_id):
         recording = AudioRecording.objects.get(id=recording_id)
         recording.status = 'processing'
         recording.save()
-        
-        # Get audio file path
-        audio_path = recording.audio_file.path
+
+        # Download audio file to temp location for processing
+        temp_audio_path = None
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(recording.audio_file.name)[1]) as temp_file:
+            temp_file.write(recording.audio_file.read())
+            temp_audio_path = temp_file.name
+        audio_path = temp_audio_path
         
         # Calculate duration
         try:
@@ -41,11 +47,14 @@ def process_audio_recording(self, recording_id):
         except Exception as e:
             logger.warning(f"⚠️ Could not calculate duration: {e}")
         
-        # Load AI detector and analyze audio
-        logger.info(f"🤖 Loading AI models...")
+        # Load AI detector and analyze audio via external API
+        logger.info(f"🤖 Loading AI detector (external API mode)...")
+        log_model_cache_info()  # Log API mode info
         detector = get_stutter_detector()
         
-        logger.info(f"🎵 Analyzing audio with AI...")
+        logger.info(f"🎵 Analyzing audio via external ML API...")
+        logger.info(f"🎵 Audio path: {audio_path}")
+        logger.info(f"🎵 Audio file exists: {os.path.exists(audio_path)}")
         analysis_data = detector.analyze_audio(audio_path)
         
         # Save analysis results
@@ -78,14 +87,14 @@ def process_audio_recording(self, recording_id):
             'severity': analysis.severity,
             'mismatch_percentage': analysis.mismatch_percentage
         }
-        
+
     except AudioRecording.DoesNotExist:
         logger.error(f"❌ Recording {recording_id} not found")
         raise
-    
+
     except Exception as e:
         logger.error(f"❌ Processing failed for recording {recording_id}: {e}")
-        
+
         try:
             recording = AudioRecording.objects.get(id=recording_id)
             recording.status = 'failed'
@@ -93,9 +102,14 @@ def process_audio_recording(self, recording_id):
             recording.save()
         except:
             pass
-        
+
         # Retry task
         raise self.retry(exc=e, countdown=60 * (self.request.retries + 1))
+
+    finally:
+        # Clean up temp file
+        if temp_audio_path and os.path.exists(temp_audio_path):
+            os.unlink(temp_audio_path)
 
 
 # slaq_project/celery.py

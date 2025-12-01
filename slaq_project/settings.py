@@ -2,16 +2,32 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
 
+from environ import Env
+import dj_database_url
+
+env = Env()
 BASE_DIR = Path(__file__).resolve().parent.parent
+Env.read_env(BASE_DIR / '.env')
 
-# Load environment variables from .env file
-load_dotenv(BASE_DIR / '.env')
+ENVIRONMENT = env('ENVIRONMENT', default='production')
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret-key-change-in-production')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+DEBUG = True
+
+# if ENVIRONMENT == 'development':
+#     DEBUG = True
+# else:
+#     DEBUG = False
+
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+
+SECRET_KEY = env('DJANGO_SECRET_KEY')
+ENCRYPT_KEY = env('DJANGO_ENCRYPT_KEY')
+
+SUPABASE_URL = env.str('SUPABASE_URL')
+SUPABASE_ANON_KEY = env.str('SUPABASE_ANON_KEY')
+SUPABASE_SERVICE_ROLE_KEY = env.str('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_BUCKET_NAME = env.str('SUPABASE_BUCKET_NAME')
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,10 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party
     'django_celery_results',
-    
+
     # Local apps
     'core.apps.CoreConfig',
     'diagnosis.apps.DiagnosisConfig',
@@ -32,9 +48,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -60,17 +76,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'slaq_project.wsgi.application'
 
-# Database
+# Database development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'slaq_d_db'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_USER_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_USER_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
+
+POSTGRES_LOCALLY = False
+if ENVIRONMENT == 'production' or POSTGRES_LOCALLY:
+    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -88,14 +108,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Media files (User uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Supabase Storage Configuration
+if ENVIRONMENT == 'production':
+    DEFAULT_FILE_STORAGE = 'core.supabase_storage.SupabaseStorage'
 
 # Default primary key field type
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication URLs
@@ -108,7 +133,7 @@ MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_AUDIO_FORMATS = ['.wav', '.mp3', '.webm', '.ogg']
 
 # Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -129,3 +154,6 @@ STUTTER_THRESHOLDS = {
     'moderate_mismatch': 25,
     'severe_mismatch': 50,
 }
+
+
+ACCOUNT_USERNAME_BLACKLIST = ['admin', 'administrator', 'root', 'superuser', 'staff', 'user', 'test', 'username', 'theboss']

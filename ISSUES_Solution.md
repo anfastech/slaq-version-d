@@ -24,11 +24,8 @@ python -m venv venv
 ```
 
 ```shell
-pip install -r requirements.txt
-```
-
-```shell
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install torchcodec==0.8.1
 ```
 
 so here the whole package will install with out conflict.
@@ -45,11 +42,11 @@ pip show torch torchvision torchaudio
 # Version: 2.5.1+cpu
 ```
 
-if no then 
+if no then,
 
 ```shell
-pip uninstall torch torchvision torchaudio
-pip install torch==2.5.1 torchvision==0.20.1 torchaudio --index-url https://download.pytorch.org/whl/cu121
+# pip uninstall torch torchvision torchaudio
+# pip install torch==2.5.1 torchvision==0.20.1 torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
 --- 

@@ -142,6 +142,7 @@
 {% block extra_js %}
 <script src="{% static 'js/audio-recorder.js' %}"></script>
 <script>
+    console.log("DEBUG setting: {{ debug }}");
     // Initialize audio recorder when page loads
     document.addEventListener('DOMContentLoaded', function() {
         initAudioRecorder();
